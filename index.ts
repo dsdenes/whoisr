@@ -1,8 +1,9 @@
+// @ts-ignore
 import WhoisParser from 'bulk-whois-parser'
 import { Netmask } from 'netmask'
 import { Pool } from 'pg'
 import { shapeDetector } from './lib/shape-detector'
-import { Record } from './types/record'
+import { Record } from './types/record.type'
 
 const pool = new Pool({
   connectionString: 'postgresql://shoprice:shoprice@localhost:5432/shoprice',
@@ -75,10 +76,10 @@ const parseInetnum = (record: Record) => {
     last = l
   }
 
-  if (record.startAddress && record.endAddress) {
-    first = record.startAddress
-    last = record.endAddress
-  }
+  // if (record.startAddress && record.endAddress) {
+  //   first = record.startAddress
+  //   last = record.endAddress
+  // }
 
   let descr = Array.isArray(record.descr) ? record.descr[0] : record.descr
   descr = descr || record.org
@@ -216,12 +217,16 @@ function onEnd() {
 }
 
 let lastTimer = setTimeout(onEnd, 500)
+let i = 0
 // 'ripe', 'lacnic', 'apnic', 'afrinic', 'arin'
-new WhoisParser({ repos: ['arin'] })
+new WhoisParser({ repos: ['ripe'] })
   .getObjects(
-    ['inetnum'],
+    ['organisation'],
     (record: string) => {
       addRecord(record)
+      if (i++ % 100 === 0) {
+        console.log(record)
+      }
       try {
         clearTimeout(lastTimer)
       } catch {}
@@ -235,7 +240,7 @@ new WhoisParser({ repos: ['arin'] })
   })
 
 // ;(async () => {
-//   const fileStream = fs.createReadStream('./src/asn.txt')
+//   const fileStream = fs.createReadStrpeam('./src/asn.txt')
 
 //   await pool.query(`
 //   CREATE TABLE IF NOT EXISTS ass (
