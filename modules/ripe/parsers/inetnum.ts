@@ -35,10 +35,10 @@ export function parseInetnum(obj: Inetnum) {
       const ipMatch = obj.inetnum?.match(
         /((?:[0-9]{1,3}\.){3}[0-9]{1,3})\s+-\s+((?:[0-9]{1,3}\.){3}[0-9]{1,3})/
       )
-      const first = ipMatch?.[1] as string
-      const last = ipMatch?.[2] as string
+      if (ipMatch !== null) {
+        organisation.addNetwork(obj.inetnum)
+      }
 
-      organisation.addNetwork([first, last])
       inetnumStats.org++
     }
   }

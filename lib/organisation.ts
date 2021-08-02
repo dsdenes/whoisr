@@ -1,24 +1,27 @@
+import { cloneDeep } from 'lodash'
+import { mergeIPRanges } from './ip'
 import { state } from './state'
 
 interface Organisation {
   id: string
-  networks: Network[]
+  networks: string[]
 }
 
-export type Network = [string, string]
-
 export interface Model<T> {
-  addNetwork: (network: Network) => void
+  addNetwork: (network: string) => void
+  networks: ReadonlyArray<string>
   persist: () => void
 }
 
-export function NewOrganisation(organisation: Organisation): Model<Organisation> {
+export function NewOrganisation(initialOrganisation: Organisation): Model<Organisation> {
+  const organisation = cloneDeep(initialOrganisation)
+
   function persist() {
     state.persist('organisations', organisation.id, organisation)
   }
 
-  function addNetwork(network: Network) {
-    organisation.networks.push(network)
+  function addNetwork(network: string) {
+    organisation.networks = mergeIPRanges([network, ...organisation.networks])
     persist()
   }
 
@@ -26,7 +29,8 @@ export function NewOrganisation(organisation: Organisation): Model<Organisation>
 
   return {
     persist,
-    addNetwork
+    addNetwork,
+    networks: organisation.networks
   }
 }
 
