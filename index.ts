@@ -1,16 +1,15 @@
 // @ts-ignore
 import WhoisParser from 'bulk-whois-parser'
-import { Netmask } from 'netmask'
-import { Pool } from 'pg'
 import { shapeDetector } from './lib/shape-detector'
+import { inetnumStats, parseInetnum } from './modules/ripe/parsers/inetnum'
 import { Record } from './types/record.type'
 
-const pool = new Pool({
-  connectionString: 'postgresql://shoprice:shoprice@localhost:5432/shoprice',
-  max: 20
-})
+// const pool = new Pool({
+//   connectionString: 'postgresql://shoprice:shoprice@localhost:5432/shoprice',
+//   max: 20
+// })
 
-const conn = pool.connect()
+// const conn = pool.connect()
 
 interface Organisation {
   startIp?: string
@@ -51,89 +50,89 @@ function getAPNICOrgName(record: Record) {
   }
 }
 
-const parseInetnum = (record: Record) => {
-  const source = 'afrinic'
+// const parseInetnum = (record: Record) => {
+//   const source = 'afrinic'
 
-  // console.log(record)
+//   // console.log(record)
 
-  // if (record.origin === 'AS6713') {
-  //   console.log(record)
-  // }
-  // console.log(record)
+//   // if (record.origin === 'AS6713') {
+//   //   console.log(record)
+//   // }
+//   // console.log(record)
 
-  let first, last
-  const ipMatch = record.inetnum?.match(
-    /((?:[0-9]{1,3}\.){3}[0-9]{1,3})\s+-\s+((?:[0-9]{1,3}\.){3}[0-9]{1,3})/
-  )
-  if (ipMatch !== null) {
-    first = ipMatch[1]
-    last = ipMatch[2]
-  }
+//   let first, last
+//   const ipMatch = record.inetnum?.match(
+//     /((?:[0-9]{1,3}\.){3}[0-9]{1,3})\s+-\s+((?:[0-9]{1,3}\.){3}[0-9]{1,3})/
+//   )
+//   if (ipMatch !== null) {
+//     first = ipMatch[1]
+//     last = ipMatch[2]
+//   }
 
-  if (record.inetnum?.match(/\//)) {
-    const { base: f, broadcast: l } = new Netmask(record.inetnum)
-    first = f
-    last = l
-  }
+//   if (record.inetnum?.match(/\//)) {
+//     const { base: f, broadcast: l } = new Netmask(record.inetnum)
+//     first = f
+//     last = l
+//   }
 
-  // if (record.startAddress && record.endAddress) {
-  //   first = record.startAddress
-  //   last = record.endAddress
-  // }
+//   // if (record.startAddress && record.endAddress) {
+//   //   first = record.startAddress
+//   //   last = record.endAddress
+//   // }
 
-  let descr = Array.isArray(record.descr) ? record.descr[0] : record.descr
-  descr = descr || record.org
+//   let descr = Array.isArray(record.descr) ? record.descr[0] : record.descr
+//   descr = descr || record.org
 
-  // const notify = Array.isArray(record.notify) ? record.notify[0] : record.notify
-  // const host = notify?.match(/@(.*)/)?.[1]
+//   // const notify = Array.isArray(record.notify) ? record.notify[0] : record.notify
+//   // const host = notify?.match(/@(.*)/)?.[1]
 
-  // console.log(record)
+//   // console.log(record)
 
-  // if (omit(Object.keys(record), knownLACNIC).length > 0) {
-  //   console.log(record)
-  // }
+//   // if (omit(Object.keys(record), knownLACNIC).length > 0) {
+//   //   console.log(record)
+//   // }
 
-  const org: Organisation = {
-    startIp: first,
-    endIp: last,
-    country: record.country,
-    source,
-    // @ts-ignore
-    ...(source !== 'apnic' && { orgName: record.org ? null : descr ?? record.netname }),
-    // @ts-ignore
-    ...(source === 'apnic' && { orgName: getAPNICOrgName(record) }),
-    // @ts-ignore
-    ...(source === 'ripe' && { ripeNetname: record.netname }),
-    // @ts-ignore
-    ...(source === 'apnic' && { apnicNetname: record.netname }),
-    // @ts-ignore
-    ...(source === 'afrinic' && { afrinicNetname: record.netname }),
-    // @ts-ignore
-    ...(source === 'arin' && { arinNetname: record.name }),
-    // @ts-ignore
-    ...(source === 'ripe' && { ripeOrg: record.org })
-  }
+//   const org: Organisation = {
+//     startIp: first,
+//     endIp: last,
+//     country: record.country,
+//     source,
+//     // @ts-ignore
+//     ...(source !== 'apnic' && { orgName: record.org ? null : descr ?? record.netname }),
+//     // @ts-ignore
+//     ...(source === 'apnic' && { orgName: getAPNICOrgName(record) }),
+//     // @ts-ignore
+//     ...(source === 'ripe' && { ripeNetname: record.netname }),
+//     // @ts-ignore
+//     ...(source === 'apnic' && { apnicNetname: record.netname }),
+//     // @ts-ignore
+//     ...(source === 'afrinic' && { afrinicNetname: record.netname }),
+//     // @ts-ignore
+//     ...(source === 'arin' && { arinNetname: record.name }),
+//     // @ts-ignore
+//     ...(source === 'ripe' && { ripeOrg: record.org })
+//   }
 
-  // console.log(`${org.startIp} ${org.orgName}`)
+//   // console.log(`${org.startIp} ${org.orgName}`)
 
-  if (org.startIp?.match(/^76\.77/)) {
-    console.log(org)
-  }
+//   if (org.startIp?.match(/^76\.77/)) {
+//     console.log(org)
+//   }
 
-  if (record.inetnum?.match(/76\.77\.128/)) {
-    console.log(org)
-  }
+//   if (record.inetnum?.match(/76\.77\.128/)) {
+//     console.log(org)
+//   }
 
-  // // if (org.orgName?.match(/broadband/)) {
-  // //   console.log(record, org)
-  // // }
+//   // // if (org.orgName?.match(/broadband/)) {
+//   // //   console.log(record, org)
+//   // // }
 
-  // // if (Object.values(org).some((v) => !v)) {
-  // //   console.log(record)
-  // // }
+//   // // if (Object.values(org).some((v) => !v)) {
+//   // //   console.log(record)
+//   // // }
 
-  return false
-}
+//   return false
+// }
 
 let tasks = 0
 let allTasks = 0
@@ -143,18 +142,18 @@ async function parseRoute(r: any) {
     process.stdout.write('.')
     tasks++
     allTasks++
-    await pool.query(`
-      INSERT INTO ass (as_id, name)
-      VALUES('${r.origin}', NULL)
-      ON CONFLICT (as_id)
-      DO NOTHING;
-    `)
-    await pool.query(`
-      INSERT INTO routes (cidr, as_id)
-      VALUES('${r.route}', '${r.origin}')
-      ON CONFLICT (cidr)
-      DO NOTHING;
-    `)
+    // await pool.query(`
+    //   INSERT INTO ass (as_id, name)
+    //   VALUES('${r.origin}', NULL)
+    //   ON CONFLICT (as_id)
+    //   DO NOTHING;
+    // `)
+    // await pool.query(`
+    //   INSERT INTO routes (cidr, as_id)
+    //   VALUES('${r.route}', '${r.origin}')
+    //   ON CONFLICT (cidr)
+    //   DO NOTHING;
+    // `)
   } catch (err) {
     // process.stdout.write('??')
     console.log(r, err)
@@ -191,7 +190,7 @@ async function parseAsn(id: string, name: string, countryCode: string) {
     DO UPDATE SET name='${name}', country_code='${countryCode}' WHERE ass.as_id='${id}';
   `
   try {
-    await pool.query(query)
+    // await pool.query(query)
   } catch (err) {
     console.log(query)
     console.log(err)
@@ -213,6 +212,7 @@ const { addRecord, printResult } = shapeDetector()
 
 function onEnd() {
   printResult()
+  console.log(inetnumStats)
   // process.exit(0)
 }
 
@@ -221,22 +221,19 @@ let i = 0
 // 'ripe', 'lacnic', 'apnic', 'afrinic', 'arin'
 new WhoisParser({ repos: ['ripe'] })
   .getObjects(
-    ['organisation'],
-    (record: string) => {
+    ['inetnum'],
+    (record: any) => {
       addRecord(record)
-      if (i++ % 100 === 0) {
-        console.log(record)
-      }
+      parseInetnum(record)
       try {
         clearTimeout(lastTimer)
       } catch {}
-      lastTimer = setTimeout(onEnd, 500)
+      lastTimer = setTimeout(onEnd, 5000)
     },
     null
   )
   .then(() => {
     console.log('OK')
-    printResult()
   })
 
 // ;(async () => {
