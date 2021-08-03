@@ -1,14 +1,11 @@
-const db = require('./db.json')
+const db = require('../db.json')
 import fs from 'fs'
-import { debounce } from 'lodash'
+import { throttle } from 'lodash'
 
-const flush = debounce(
-  () => {
-    fs.writeFile('./db.json', JSON.stringify(db), () => {})
-  },
-  500,
-  { leading: false, trailing: true }
-)
+const flush = throttle(() => {
+  console.log('persist')
+  fs.writeFile('./db.json', JSON.stringify(db), () => {})
+}, 5000)
 
 function persist(collection: string, id: string, document: any) {
   db[collection] = db[collection] ?? {}
@@ -16,10 +13,16 @@ function persist(collection: string, id: string, document: any) {
   flush()
 }
 
-function get(collection: string, id: string) {
+function getCollection(collection: string) {
+  return db[collection]
+}
+
+function getById(collection: string, id: string) {
   return db[collection]?.[id]
 }
+
 export const state = {
   persist,
-  get
+  getById,
+  getCollection
 }

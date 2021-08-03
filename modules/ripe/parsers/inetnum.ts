@@ -1,6 +1,7 @@
 // https://www.ripe.net/manage-ips-and-asns/db/support/documentation/ripe-database-documentation/rpsl-object-types/4-2-descriptions-of-primary-objects/4-2-4-description-of-the-inetnum-object
 
 import { Organisation } from '../../../lib/organisation'
+import { state } from '../../../lib/state'
 
 interface Inetnum {
   inetnum: string
@@ -26,22 +27,22 @@ export const inetnumStats = {
   org: 0
 }
 
+const orgs = state.getCollection('organisations')
+
 export function parseInetnum(obj: Inetnum) {
   inetnumStats.total++
-  if (obj.status === 'ASSIGNED PA') {
-    if (obj.org) {
-      const organisation = Organisation(obj.org)
+  // if (obj.status === 'ASSIGNED PA') {
+  if (obj.org && orgs?.[obj.org] === undefined) {
+    const organisation = Organisation(obj.org)
 
-      const ipMatch = obj.inetnum?.match(
-        /((?:[0-9]{1,3}\.){3}[0-9]{1,3})\s+-\s+((?:[0-9]{1,3}\.){3}[0-9]{1,3})/
-      )
-      if (ipMatch !== null) {
-        organisation.addNetwork(obj.inetnum)
-      }
-
-      inetnumStats.org++
+    const ipMatch = obj.inetnum?.match(
+      /((?:[0-9]{1,3}\.){3}[0-9]{1,3})\s+-\s+((?:[0-9]{1,3}\.){3}[0-9]{1,3})/
+    )
+    if (ipMatch !== null) {
+      organisation.addNetwork(obj.inetnum)
     }
+
+    inetnumStats.org++
   }
-  // 1: parse CIDR
-  // 2: identify organisation
+  // }
 }

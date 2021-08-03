@@ -1,7 +1,7 @@
 // @ts-ignore
 import WhoisParser from 'bulk-whois-parser'
-import { shapeDetector } from './lib/shape-detector'
-import { inetnumStats, parseInetnum } from './modules/ripe/parsers/inetnum'
+import ora from 'ora'
+import { parseRoute } from './modules/ripe/parsers/route'
 import { Record } from './types/record.type'
 
 // const pool = new Pool({
@@ -137,36 +137,36 @@ function getAPNICOrgName(record: Record) {
 let tasks = 0
 let allTasks = 0
 
-async function parseRoute(r: any) {
-  try {
-    process.stdout.write('.')
-    tasks++
-    allTasks++
-    // await pool.query(`
-    //   INSERT INTO ass (as_id, name)
-    //   VALUES('${r.origin}', NULL)
-    //   ON CONFLICT (as_id)
-    //   DO NOTHING;
-    // `)
-    // await pool.query(`
-    //   INSERT INTO routes (cidr, as_id)
-    //   VALUES('${r.route}', '${r.origin}')
-    //   ON CONFLICT (cidr)
-    //   DO NOTHING;
-    // `)
-  } catch (err) {
-    // process.stdout.write('??')
-    console.log(r, err)
-    //   console.log(`
-    //   INSERT INTO routes (cidr, as_id)
-    //   VALUES('${r.route}', '${r.origin}')
-    //   ON CONFLICT (cidr)
-    //   DO NOTHING;
-    // `)
-  } finally {
-    tasks--
-  }
-}
+// async function parseRoute(r: any) {
+//   try {
+//     process.stdout.write('.')
+//     tasks++
+//     allTasks++
+//     // await pool.query(`
+//     //   INSERT INTO ass (as_id, name)
+//     //   VALUES('${r.origin}', NULL)
+//     //   ON CONFLICT (as_id)
+//     //   DO NOTHING;
+//     // `)
+//     // await pool.query(`
+//     //   INSERT INTO routes (cidr, as_id)
+//     //   VALUES('${r.route}', '${r.origin}')
+//     //   ON CONFLICT (cidr)
+//     //   DO NOTHING;
+//     // `)
+//   } catch (err) {
+//     // process.stdout.write('??')
+//     console.log(r, err)
+//     //   console.log(`
+//     //   INSERT INTO routes (cidr, as_id)
+//     //   VALUES('${r.route}', '${r.origin}')
+//     //   ON CONFLICT (cidr)
+//     //   DO NOTHING;
+//     // `)
+//   } finally {
+//     tasks--
+//   }
+// }
 
 async function parseAsn(id: string, name: string, countryCode: string) {
   tasks++
@@ -208,27 +208,37 @@ async function parseAsn(id: string, name: string, countryCode: string) {
 //   }
 // }
 
-const { addRecord, printResult } = shapeDetector()
+// const { addRecord, printResult } = shapeDetector()
 
-function onEnd() {
-  printResult()
-  console.log(inetnumStats)
-  // process.exit(0)
-}
+// function onEnd() {
+//   // printResult()
+//   process.exit(0)
+// }
 
-let lastTimer = setTimeout(onEnd, 500)
+// let lastTimer = setTimeout(onEnd, 500)
+const spinner = ora('Parsing').start()
 let i = 0
+
+// 'ripe', 'lacnic', 'apnic', 'afrinic', 'arin'
+// new WhoisParser({ repos: ['ripe'] })
+//   .getObjects(
+//     ['inetnum'],
+//     (record: any) => {
+//       spinner.text = `INETNUM: ${i++}`
+//       parseInetnum(record)
+//     },
+//     null
+//   )
+//   .then(() => {
+//     console.log('END')
+//   })
+
 // 'ripe', 'lacnic', 'apnic', 'afrinic', 'arin'
 new WhoisParser({ repos: ['ripe'] })
   .getObjects(
-    ['inetnum'],
+    ['route'],
     (record: any) => {
-      addRecord(record)
-      parseInetnum(record)
-      try {
-        clearTimeout(lastTimer)
-      } catch {}
-      lastTimer = setTimeout(onEnd, 5000)
+      parseRoute(record)
     },
     null
   )

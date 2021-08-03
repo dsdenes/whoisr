@@ -2,7 +2,7 @@ import { cloneDeep } from 'lodash'
 import { mergeIPRanges } from './ip'
 import { state } from './state'
 
-interface Organisation {
+export interface Organisation {
   id: string
   networks: string[]
 }
@@ -35,6 +35,6 @@ export function NewOrganisation(initialOrganisation: Organisation): Model<Organi
 }
 
 export function Organisation(orgId: string): Model<Organisation> {
-  const storedOrg = state.get('organisations', orgId)
+  const storedOrg = state.getById('organisations', orgId)
   return NewOrganisation(storedOrg ?? { id: orgId, networks: [] })
 }
